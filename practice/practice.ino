@@ -13,7 +13,7 @@
 #define SENSOR4 47
 #define SENSOR3 49
 
-#define LOGIC LOW
+#define LOGIC HIGH
 
 int buttonState = 0;
 int oldstat = 0;
@@ -85,7 +85,7 @@ int justSen(int senIndex){
     return !(sen3 == LOGIC && sen2 != LOGIC && sen1 != LOGIC && sen4 != LOGIC);
   }
   else if(senIndex == 3){
-    return !sen4 == LOGIC && (sen2 != LOGIC && sen3 != LOGIC && sen1 != LOGIC);
+    return !(sen4 == LOGIC && sen2 != LOGIC && sen3 != LOGIC && sen1 != LOGIC);
   }
   else if(senIndex == 4){
     return !(sen1 != LOGIC && sen3 != LOGIC && sen2 == LOGIC && sen4 == LOGIC);
@@ -121,6 +121,23 @@ int justPair(int senIndex) {
   }
  
 }
+int checkLast(int sens[]) {
+  if((sens[0] != LOGIC && sens[1] != LOGIC && sens[2] != LOGIC && sens[3] != LOGIC) || (sens[0] != LOGIC && sens[1] == LOGIC && sens[2] == LOGIC && sens[3] != LOGIC)) {
+      
+      //forward
+      return 2; //first is still 1
+  }
+  if((sens[0] == LOGIC && sens[1] != LOGIC && sens[2] != LOGIC && sens[3] != LOGIC) || (sens[0] != LOGIC && sens[1] == LOGIC && sens[2] != LOGIC && sens[3] != LOGIC) || (sens[2] != LOGIC && sens[3] != LOGIC && sens[1] == LOGIC && sens[0] == LOGIC)){ //left
+      return 0;
+    }
+    else if((sens[2] == LOGIC && sens[1] != LOGIC && sens[0] != LOGIC && sens[3] != LOGIC) || (sens[3] == LOGIC && sens[1] != LOGIC && sens[2] != LOGIC && sens[0] != LOGIC) || (sens[2] == LOGIC && sens[3] == LOGIC && sens[1] != LOGIC || sens[0] != LOGIC)){//right
+      return 1;
+    }
+    
+    else if( ((sens[0] != LOGIC && sens[2] != LOGIC && sens[1] == LOGIC && sens[3] == LOGIC)) || ((sens[1] != LOGIC && sens[3] != LOGIC && sens[0] == LOGIC && sens[2] == LOGIC)) || ((sens[2] == LOGIC && sens[3] != LOGIC && sens[1] == LOGIC || sens[0] == LOGIC)) || (sens[2] == LOGIC && sens[3] == LOGIC && sens[1] == LOGIC || sens[0] != LOGIC)) { //line
+      return 3;
+    }
+}
 //
 // parameters
 //left 0
@@ -134,9 +151,11 @@ int findOut(int sens[]) {
   //if first time sensing
   
     //if all sensors are not triggered
+    Serial.print("first");
+    Serial.print(first);
     if(sen1 != LOGIC && sen2 != LOGIC && sen3 != LOGIC && sen4 != LOGIC) {
       if(!first) {
-        
+        return checkLast(sens);
       }
       
       return 2; //first is still 1
@@ -168,12 +187,7 @@ void go()
   
   /*buttonState = digitalRead(buttonPin);*/
   
-  int left2 = sen1 == LOGIC && sen2 == LOGIC;   // left two sensors low
-  int left3 = sen1 == LOGIC && sen2 == LOGIC && sen3 == LOGIC;   // left three sensors low
-  int right2 = sen3 == LOGIC && sen4 == LOGIC;   // Right two sensors low
-  int right3 = sen2 == LOGIC && sen3 == LOGIC && sen4 == LOGIC; // right three sensors low
-  int middle = sen2 == LOGIC && sen3 == LOGIC; // middle 2 sensors low
-  int all = sen1 == LOGIC && sen2 == LOGIC && sen3 == LOGIC && sen4 == LOGIC;   // all sensors
+  
   int calc = findOut(sens);
   sens[0] = sen1;
   sens[1] = sen2;
@@ -267,6 +281,3 @@ void loop()
   go();
   
 }
-
-
-  
